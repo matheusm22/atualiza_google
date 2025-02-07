@@ -1,3 +1,4 @@
+
 document.getElementById('start').addEventListener('click', () => {
     const intervalInput = document.getElementById('interval').value;
     const interval = parseInt(intervalInput, 10);

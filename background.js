@@ -1,3 +1,4 @@
+
 let refreshInterval = 45; // Intervalo padrão em segundos
 let timeLeft = refreshInterval; // Tempo restante
 let intervalId = null;
