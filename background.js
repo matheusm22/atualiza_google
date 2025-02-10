@@ -1,27 +1,35 @@
-
-let refreshInterval = 45; // Intervalo padrão em segundos
+let refreshInterval = 120; // Intervalo padrão em segundos
 let timeLeft = refreshInterval; // Tempo restante
 let intervalId = null;
+let targetTabId = null; // Aba que será atualizada
 
 // Atualiza o badge com o tempo restante
 function updateBadge() {
   chrome.action.setBadgeText({ text: timeLeft.toString() });
-  chrome.action.setBadgeBackgroundColor({ color: "#FF0000" });
+  chrome.action.setBadgeBackgroundColor({ color: "#008000" });
 }
 
-// Atualiza a aba ativa
+// Atualiza a aba específica
 function refreshPage() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs.length > 0) {
-      chrome.tabs.reload(tabs[0].id);
-    }
-  });
-  timeLeft = refreshInterval; // Reseta o tempo restante
-  updateBadge();
+  if (targetTabId !== null) {
+    chrome.tabs.get(targetTabId, (tab) => {
+      if (chrome.runtime.lastError || !tab) {
+        console.log("Aba fechada ou não encontrada, parando o contador.");
+        clearInterval(intervalId);
+        intervalId = null;
+        chrome.action.setBadgeText({ text: "" });
+        return;
+      }
+      chrome.tabs.reload(targetTabId);
+      timeLeft = refreshInterval; // Reseta o tempo restante
+      updateBadge();
+    });
+  }
 }
 
 // Inicia o intervalo
-function startRefreshing() {
+function startRefreshing(tabId) {
+  targetTabId = tabId; // Define a aba específica
   if (intervalId) {
     clearInterval(intervalId);
   }
@@ -33,22 +41,37 @@ function startRefreshing() {
       updateBadge();
     }
   }, 1000);
+
+  // Salva as configurações no armazenamento
+  chrome.storage.local.set({ refreshInterval, timeLeft, targetTabId });
 }
 
-// Ouve mensagens do popup
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.action === 'start') {
-    refreshInterval = message.interval;
-    timeLeft = refreshInterval;
-    startRefreshing();
+// Recupera o estado salvo ao iniciar a extensão
+chrome.storage.local.get(['refreshInterval', 'timeLeft', 'targetTabId'], (data) => {
+  refreshInterval = data.refreshInterval || 45;
+  timeLeft = data.timeLeft || refreshInterval;
+  targetTabId = data.targetTabId || null;
+  if (targetTabId) {
+    startRefreshing(targetTabId);
   }
 });
 
-// Define o intervalo inicial ao carregar
-chrome.storage.local.get('refreshInterval', (data) => {
-  if (data.refreshInterval) {
-    refreshInterval = data.refreshInterval;
+// Salva o estado antes de o service worker encerrar
+chrome.runtime.onSuspend.addListener(() => {
+  chrome.storage.local.set({ refreshInterval, timeLeft, targetTabId });
+});
+
+// Ouve mensagens do popup para iniciar/atualizar o intervalo
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message.action === 'start') {
+    refreshInterval = message.interval;
     timeLeft = refreshInterval;
-    startRefreshing();
+
+    // Obtém a aba ativa no momento e inicia o contador apenas para ela
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length > 0) {
+        startRefreshing(tabs[0].id);
+      }
+    });
   }
 });
