@@ -1,0 +1,15 @@
+
+{
+  "manifest_version": 3,
+  "name": "Auto Refresh",
+  "version": "1.2",
+  "description": "Atualiza automaticamente a página em um intervalo configurável.",
+  "permissions": ["tabs", "activeTab", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Auto Refresh",
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Refresh</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 10px;
+    }
+    input {
+      width: 60px;
+      text-align: center;
+      margin: 5px;
+      border-radius: 50px;
+    }
+    #start {
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      size: 28px;
+    }
+    #stop {
+      position: relative;
+      top: 5px;
+      padding: 5px 10px;
+      background-color: #d60a0a;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      size: 28px;
+    }
+    #start:hover {
+      background-color: #0056b3;
+    }
+    #stop:hover {
+      background-color: #c00303;
+    }
+  </style>
+</head>
+<body>
+  <h1>Auto Refresh</h1>
+  <p>Configure o intervalo em segundos:</p>
+  <input type="text" id="interval" value="80" placeholder="80" min="1">
+  <button id="start">Start</button>
+  <button id="stop">Stop</button>
+  <p id="status"></p>
+  <script src="popup.js"></script>
+</body>
+</html>
